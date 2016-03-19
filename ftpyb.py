@@ -1,9 +1,28 @@
+#!/usr/bin/env python
+
+#
+# A small python script for ftp back
+# ease and automtation. All included 
+# one file to ease cron scheduling.
+# 
+# Copyright (c) 2016, Tilemachos B.
+# 
+
 from ftplib import FTP
 import os
 
 
 class Backup:
+	"""
+	A class that is used for the back up from 
+	the ftp server.
+	"""
+	
     def get_all_files(self, filenames):
+		"""
+		A recursive method that downloads everything
+		under a specified directory.
+		"""
         for filename in filenames:
             if filename[1]['type'] == 'file':
                 self.get_file(filename[0], ftp.pwd())
@@ -15,6 +34,10 @@ class Backup:
                 continue
 
     def get_file(self, filename, d):
+		"""
+		A method that downloads a file in a specific 
+		directory path.
+		"""
         local_file = "backup" + d + "/" + filename
         os.makedirs(os.path.dirname(local_file), exist_ok=True)
         f = open(local_file, "wb")
@@ -22,11 +45,13 @@ class Backup:
         f.close
         return
 
-    def store_db_dump():
-        pass
-
 
 class Automate:
+	"""
+	A class that produce a python script for a 
+	specific backup task that needs to be automated.
+	"""
+	
     back = Backup()
     host = ''
     user = ''
@@ -36,6 +61,11 @@ class Automate:
     
     
     def create_backup_script(self):
+		"""
+		A method that writes the code needed in a file
+		using the specified user input
+		"""
+		
         code = "from ftplib import FTP\n" \
                 "import os\n" \
                 "\n" \
@@ -73,6 +103,9 @@ class Automate:
         pass
     
     def get_user_input(self):
+		"""
+		A method in which the user specifies the parameters for the automation script
+		"""
         print('*** Starting the input process of ftp back up python script creation. *** \n')
         self.host = input('What is the hostname? ')
         self.user = input('What is the username? ')
@@ -83,11 +116,19 @@ class Automate:
         pass
 
     def main(self):
+		"""
+		Main method of the class is the only who 
+		is called by obj.
+		"""
         self.get_user_input()
         self.create_backup_script()
         pass
 
 class UI:
+	"""
+	The class that produces the User Interface either for live
+	ftp back up or automated script production
+	"""
     backup = Backup()
 
     def directory_listing(self):
@@ -108,7 +149,18 @@ class UI:
         return ftp.quit()
 
     def help(self):
-        print("All commands")
+        print("""
+        ls			Direcotry Listing
+        pwd			Current Path
+        cd			Move to directory <path>
+        help		Prints this page
+        getf		Download a file from current directory <filename>
+        getd		Download a directory and all its contents <directory>
+        exit		Leave the ftp server and the script
+        connect		Connect to the ftp server <host>
+        login		Login to ftp with credentials given <user@password>
+        automate	Begins process for creation of automated script
+        """)
         pass
 
     def get_file(self, filename):
@@ -136,6 +188,9 @@ class UI:
         return self.backup.get_file(filename, ftp.pwd())
 
     def command(self, cmd, arg=''):
+		"""
+		Method that maps user input to actual commands
+		"""
         if cmd == 'ls':
             return self.directory_listing()
         elif cmd == 'pwd':
@@ -152,7 +207,7 @@ class UI:
             return self.quit()
         elif cmd == 'connect':
             return self.connect(arg)
-        elif cmd == 'user':
+        elif cmd == 'user':					# deprecated
             return self.user(arg)
         elif cmd == 'login':
             return self.login(arg)
